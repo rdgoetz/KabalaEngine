@@ -131,7 +131,7 @@ LuaBehaviorType LuaBehaviorType::create(const std::string &szName,
     
     if(!bEvents.empty())
     {
-        boost::algorithm::split( evtSplitVec, bEvents, boost::algorithm::is_any_of(std::string(";")) );
+        boost::algorithm::split( evtSplitVec, bEvents, boost::algorithm::is_any_of(std::string(";,")));
     }
     
     if(luaCallback.empty())
@@ -149,40 +149,47 @@ LuaBehaviorType LuaBehaviorType::create(const std::string &szName,
                 StrVecItor != eventArgs.end() ;
                 ++StrVecItor)
             {
-                boost::algorithm::split( eventDefs, (*StrVecItor), boost::algorithm::is_any_of(":"));
-                
-                toParse = eventDefs[0];
-
-                boost::algorithm::trim(toParse);
-
-                if(toParse.length() > 1 && (toParse[0] == '\"' || toParse[0] == '\'') && (toParse[toParse.length()-1] == '\"' || toParse[toParse.length()-1] == '\''))
+                if(StrVecItor->empty())
                 {
-                    toParse = toParse.substr(1,toParse.length()-2);
-                }
-                else if((toParse[0] != '*'))
-                {
-                    SWARNING << "Malformed linking string. Should be \'FieldContainerName:EventName:Callback|FieldContainerName:EventName:Callback|...\'" <<
-                                "The name must be encased in quotes." << endLog;
-                    return LuaBehaviorType(szName,NULL);
-                }
-
-                //boost::algorithm::replace_all_regex(toParse, boost::regex("\\([^])"), std::string("$1"));
-
-                if(eventDefs.size() == 3)
-                {
-                    fcsrcSplitVec.push_back(toParse);
-                    toParse = eventDefs[1];
-                    boost::algorithm::trim(toParse);
-                    evtlkSplitVec.push_back(toParse);
-                    toParse = eventDefs[2];
-                    boost::algorithm::trim(toParse);
-                    luacSplitVec.push_back(toParse);
+                    SWARNING << "Empty string found between pipe characters (|)" << endLog;
                 }
                 else
                 {
-                    SWARNING << "Malformed linking string. Should be \'FieldContainerName:EventName:Callback|FieldContainerName:EventName:Callback|...\'" <<
-                                "Use wilcards (*) in place of FieldContainerName to specify that this behavior is to listen to any behaviors that can provide that event." << endLog;
-                    return LuaBehaviorType(szName,NULL);
+                    boost::algorithm::split( eventDefs, (*StrVecItor), boost::algorithm::is_any_of(":"));
+                    
+                    toParse = eventDefs[0];
+
+                    boost::algorithm::trim(toParse);
+
+                    if(toParse.length() > 1 && (toParse[0] == '\"' || toParse[0] == '\'') && (toParse[toParse.length()-1] == '\"' || toParse[toParse.length()-1] == '\''))
+                    {
+                        toParse = toParse.substr(1,toParse.length()-2);
+                    }
+                    else if((toParse[0] != '*'))
+                    {
+                        SWARNING << "Malformed linking string. Should be \'FieldContainerName:EventName:Callback|FieldContainerName:EventName:Callback|...\'" <<
+                                    "The name must be encased in quotes." << endLog;
+                        return LuaBehaviorType(szName,NULL);
+                    }
+
+                    //boost::algorithm::replace_all_regex(toParse, boost::regex("\\([^])"), std::string("$1"));
+
+                    if(eventDefs.size() == 3)
+                    {
+                        fcsrcSplitVec.push_back(toParse);
+                        toParse = eventDefs[1];
+                        boost::algorithm::trim(toParse);
+                        evtlkSplitVec.push_back(toParse);
+                        toParse = eventDefs[2];
+                        boost::algorithm::trim(toParse);
+                        luacSplitVec.push_back(toParse);
+                    }
+                    else
+                    {
+                        SWARNING << "Malformed linking string. Should be \'FieldContainerName:EventName:Callback|FieldContainerName:EventName:Callback|...\'" <<
+                                    "Use wilcards (*) in place of FieldContainerName to specify that this behavior is to listen to any behaviors that can provide that event." << endLog;
+                        return LuaBehaviorType(szName,NULL);
+                    }
                 }
             }
         }
@@ -202,38 +209,45 @@ LuaBehaviorType LuaBehaviorType::create(const std::string &szName,
                 StrVecItor != eventArgs.end() ;
                 ++StrVecItor)
             {
-                boost::algorithm::split( eventDefs, (*StrVecItor), boost::algorithm::is_any_of(":"));
-                
-                toParse = eventDefs[0];
-
-                boost::algorithm::trim(toParse);
-                
-                if(toParse.length() > 1 && (toParse[0] == '\"' || toParse[0] == '\'') && (toParse[toParse.length()-1] == '\"' || toParse[toParse.length()-1] == '\''))
+                if(StrVecItor->empty())
                 {
-                    toParse = toParse.substr(1,toParse.length()-2);
-                }
-                else if((toParse[0] != '*'))
-                {
-                    SWARNING << "Malformed linking string. Should be \'FieldContainerName:EventName:Callback|FieldContainerName:EventName:Callback|...\'" <<
-                                "The name must be encased in quotes." << endLog;
-                    return LuaBehaviorType(szName,NULL);
-                }
-
-                //boost::algorithm::replace_all_regex(toParse, boost::regex("\\([^])"), std::string("$1"));
-
-                if(eventDefs.size() == 2)
-                {
-                    fcsrcSplitVec.push_back(toParse);
-                    toParse = eventDefs[1];
-                    boost::algorithm::trim(toParse);
-                    evtlkSplitVec.push_back(toParse);
-                    luacSplitVec.push_back(luaCallback);
+                    SWARNING << "Empty string found between pipe characters (|)" << endLog;
                 }
                 else
                 {
-                    SWARNING << "Malformed linking string. Should be \'FieldContainerName:EventName:Callback|FieldContainerName:EventName:Callback|...\'" <<
-                                "Use wilcards (*) in place of FieldContainerName to specify that this behavior is to listen to any behaviors that can provide that event." << endLog;
-                    return LuaBehaviorType(szName,NULL);
+                    boost::algorithm::split( eventDefs, (*StrVecItor), boost::algorithm::is_any_of(":"));
+                    
+                    toParse = eventDefs[0];
+
+                    boost::algorithm::trim(toParse);
+                    
+                    if(toParse.length() > 1 && (toParse[0] == '\"' || toParse[0] == '\'') && (toParse[toParse.length()-1] == '\"' || toParse[toParse.length()-1] == '\''))
+                    {
+                        toParse = toParse.substr(1,toParse.length()-2);
+                    }
+                    else if((toParse[0] != '*'))
+                    {
+                        SWARNING << "Malformed linking string. Should be \'FieldContainerName:EventName:Callback|FieldContainerName:EventName:Callback|...\'" <<
+                                    "The name must be encased in quotes." << endLog;
+                        return LuaBehaviorType(szName,NULL);
+                    }
+
+                    //boost::algorithm::replace_all_regex(toParse, boost::regex("\\([^])"), std::string("$1"));
+
+                    if(eventDefs.size() == 2)
+                    {
+                        fcsrcSplitVec.push_back(toParse);
+                        toParse = eventDefs[1];
+                        boost::algorithm::trim(toParse);
+                        evtlkSplitVec.push_back(toParse);
+                        luacSplitVec.push_back(luaCallback);
+                    }
+                    else
+                    {
+                        SWARNING << "Malformed linking string. Should be \'FieldContainerName:EventName:Callback|FieldContainerName:EventName:Callback|...\'" <<
+                                    "Use wilcards (*) in place of FieldContainerName to specify that this behavior is to listen to any behaviors that can provide that event." << endLog;
+                        return LuaBehaviorType(szName,NULL);
+                    }
                 }
             }
         }
